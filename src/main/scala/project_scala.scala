@@ -98,7 +98,7 @@ object project_scala extends App {
     preparedStatement.setString(6, ch)
     preparedStatement.setString(7, payment)
     preparedStatement.setDouble(8, discount)
-    preparedStatement.setDouble(9, (price-discount))
+    preparedStatement.setDouble(9, price-discount)
 
     if (preparedStatement.executeUpdate() > 0 && discount > 0)
       logger.info(s"Transaction qualifies for a: ${BigDecimal(discount).setScale(2, RoundingMode.HALF_UP).toDouble} Discount")
