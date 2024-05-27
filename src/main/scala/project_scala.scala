@@ -1,21 +1,16 @@
-import java.io.{File, FileOutputStream, PrintWriter}
-import java.text.SimpleDateFormat
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
-import java.util.Date
-import scala.io.Source
 import com.typesafe.scalalogging.Logger
 
 import java.sql.{Connection, DriverManager, PreparedStatement}
+import java.text.SimpleDateFormat
+import java.time.temporal.ChronoUnit
+import java.util.Date
+import scala.io.Source
 import scala.math.BigDecimal.RoundingMode
 
 object project_scala extends App {
   val lines = Source.fromFile("src/TRX1000.csv").getLines().drop(1).toList
-  val f: File = new File("src/updatedTRX.csv")
   val format1 = new SimpleDateFormat("yyyy-MM-dd")
   val format2 = new SimpleDateFormat("MM/dd/yyyy")
-  val writer = new PrintWriter(new FileOutputStream(f,true))
-  writer.write("timestamp,product_name,expiry_date,quantity,unit_price,channel,payment_method,discount,final price"+"\n")
   val logger = Logger("name")
   val trans = lines.map {
     element => val pair = element.split(",")
@@ -113,19 +108,17 @@ object project_scala extends App {
       logger.warn(s"Transaction failed!")
 
     // Execute the INSERT statement
-   preparedStatement.executeUpdate()
+    preparedStatement.executeUpdate()
   }
   trans.foreach(x => {
     val res = checkDiscount(List(aCheckExpiry(x), bCheckType(x), cCheckDate(x),dCheckQuantity(x),eCheckChannel(x),fCheckVisa(x)))
     if (res.head == 0)
-      processTRX(x._1,x._2,x._3,x._4,x._5,x._6,x._7,0.00)+"\n"
+      processTRX(x._1,x._2,x._3,x._4,x._5,x._6,x._7,0.00)
     else {
-      if (res.head == 0)
-        processTRX(x._1,x._2,x._3,x._4,x._5,x._6,x._7,res.head)+"\n"
-       // println(res)
-      else 0
-      processTRX(x._1,x._2,x._3,x._4,x._5,x._6,x._7,(res.head+res(1))/2.00)+"\n"
-      //println(res)
+      if (res(1) == 0)
+        processTRX(x._1,x._2,x._3,x._4,x._5,x._6,x._7,res.head)
+      else
+      processTRX(x._1,x._2,x._3,x._4,x._5,x._6,x._7,(res.head+res(1))/2.00)
     }
   })
 
